@@ -1,0 +1,60 @@
+﻿<Window x:Class="TimeAnchor.ReminderDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Görev Detayları" Height="450" Width="350"
+        WindowStartupLocation="CenterOwner"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <StackPanel Margin="20">
+        <!-- Başlık -->
+        <TextBox x:Name="TxtTitle" 
+                 materialDesign:HintAssist.Hint="Görev Başlığı" 
+                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                 FontSize="16" FontWeight="Bold"/>
+
+        <!-- Açıklama (Çok satırlı) -->
+        <TextBox x:Name="TxtDescription" 
+                 materialDesign:HintAssist.Hint="Detaylı Açıklama" 
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                 TextWrapping="Wrap" AcceptsReturn="True" 
+                 VerticalScrollBarVisibility="Auto" 
+                 Height="120" Margin="0,20,0,0"/>
+
+        <Grid Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Tarih Seçici -->
+            <DatePicker x:Name="DpDate" 
+                        Grid.Column="0"
+                        materialDesign:HintAssist.Hint="Tarih" 
+                        Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
+
+            <!-- Saat Seçici -->
+            <materialDesign:TimePicker x:Name="TpTime" 
+                                       Grid.Column="2"
+                                       Is24Hours="True"
+                                       materialDesign:HintAssist.Hint="Saat" 
+                                       Style="{StaticResource MaterialDesignFloatingHintTimePicker}"/>
+        </Grid>
+        <ComboBox x:Name="CmbRecurrence" materialDesign:HintAssist.Hint="Yenileme Sıklığı" Style="{StaticResource MaterialDesignFloatingHintComboBox}" Margin="0,20,0,0" FontSize="14">
+            <ComboBoxItem Content="Asla"/>
+            <ComboBoxItem Content="Her Gün"/>
+            <ComboBoxItem Content="Her Hafta"/>
+            <ComboBoxItem Content="Her Ay"/>
+            <ComboBoxItem Content="Her Yıl"/>
+        </ComboBox>
+        <!-- Kaydet Butonu -->
+        <Button x:Name="BtnSave" Content="GÜNCELLE VE KAYDET" 
+                Margin="0,30,0,0" Click="BtnSave_Click"/>
+        <Button x:Name="BtnDelete" Content="GÖREVİ SİL" 
+                Margin="0,10,0,0" Background="#D32F2F" BorderBrush="#D32F2F" Foreground="White" 
+                Click="BtnDelete_Click"/>
+    </StackPanel>
+</Window>
