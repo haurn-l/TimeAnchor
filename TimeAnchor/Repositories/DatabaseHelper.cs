@@ -22,6 +22,7 @@ namespace TimeAnchor.Repositories
                         EventDate TEXT NOT NULL,
                         IsTimeSpecific INTEGER NOT NULL,
                         IsCompleted INTEGER NOT NULL,
+                        IsActive INTEGER NOT NULL DEFAULT 1,
                         IsSynced INTEGER NOT NULL,
                         Recurrence INTEGER NOT NULL DEFAULT 0
                     );";
@@ -39,8 +40,8 @@ namespace TimeAnchor.Repositories
             {
                 connection.Open();
                 string insertQuery = @"
-                    INSERT INTO Reminders (Title, Description, EventDate, IsTimeSpecific, IsCompleted, IsSynced, Recurrence) 
-                    VALUES (@Title, @Description, @EventDate, @IsTimeSpecific, @IsCompleted, @IsSynced, @Recurrence)";
+                    INSERT INTO Reminders (Title, Description, EventDate, IsTimeSpecific, IsCompleted, IsActive, IsSynced, Recurrence) 
+                    VALUES (@Title, @Description, @EventDate, @IsTimeSpecific, @IsCompleted, @IsActive, @IsSynced, @Recurrence)";
 
                 using (var command = new SqliteCommand(insertQuery, connection))
                 {
@@ -49,9 +50,8 @@ namespace TimeAnchor.Repositories
                     command.Parameters.AddWithValue("@EventDate", reminder.EventDate.ToString("o"));
                     command.Parameters.AddWithValue("@IsTimeSpecific", reminder.IsTimeSpecific ? 1 : 0);
                     command.Parameters.AddWithValue("@IsCompleted", reminder.IsCompleted ? 1 : 0);
+                    command.Parameters.AddWithValue("@IsActive", reminder.IsActive ? 1 : 0);
                     command.Parameters.AddWithValue("@IsSynced", reminder.IsSynced ? 1 : 0);
-
-                    // Enum değerini Integer'a (0,1,2,3,4) çevirip veritabanına yazıyoruz
                     command.Parameters.AddWithValue("@Recurrence", (int)reminder.Recurrence);
 
                     command.ExecuteNonQuery();
@@ -81,9 +81,8 @@ namespace TimeAnchor.Repositories
                                 EventDate = DateTime.Parse(reader["EventDate"].ToString()),
                                 IsTimeSpecific = Convert.ToInt32(reader["IsTimeSpecific"]) == 1,
                                 IsCompleted = Convert.ToInt32(reader["IsCompleted"]) == 1,
+                                IsActive = Convert.ToInt32(reader["IsActive"]) == 1,
                                 IsSynced = Convert.ToInt32(reader["IsSynced"]) == 1,
-
-                                // Veritabanındaki Integer değeri tekrar Enum'a çeviriyoruz
                                 Recurrence = (RecurrenceType)Convert.ToInt32(reader["Recurrence"])
                             });
                         }
@@ -105,6 +104,7 @@ namespace TimeAnchor.Repositories
                         EventDate = @EventDate, 
                         IsTimeSpecific = @IsTimeSpecific, 
                         IsCompleted = @IsCompleted, 
+                        IsActive = @IsActive,
                         IsSynced = @IsSynced,
                         Recurrence = @Recurrence
                     WHERE Id = @Id";
@@ -117,6 +117,7 @@ namespace TimeAnchor.Repositories
                     command.Parameters.AddWithValue("@EventDate", reminder.EventDate.ToString("o"));
                     command.Parameters.AddWithValue("@IsTimeSpecific", reminder.IsTimeSpecific ? 1 : 0);
                     command.Parameters.AddWithValue("@IsCompleted", reminder.IsCompleted ? 1 : 0);
+                    command.Parameters.AddWithValue("@IsActive", reminder.IsActive ? 1 : 0);
                     command.Parameters.AddWithValue("@IsSynced", reminder.IsSynced ? 1 : 0);
                     command.Parameters.AddWithValue("@Recurrence", (int)reminder.Recurrence);
 

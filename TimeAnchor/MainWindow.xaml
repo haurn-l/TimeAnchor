@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="TimeAnchor" Height="600" Width="400"
+        Title="TimeAnchor" Height="600" Width="450"
         WindowStartupLocation="CenterScreen"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
@@ -12,7 +12,6 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}">
 
-    <!-- Ekranı altlı üstlü 2 satıra bölüyoruz -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -22,51 +21,115 @@
         <!-- ÜST KISIM (Header Bar) -->
         <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" Grid.Row="0" materialDesign:ElevationAssist.Elevation="Dp4">
             <Grid>
-                <TextBlock Text="TimeAnchor" VerticalAlignment="Center" FontSize="22" FontWeight="Bold"/>
-
-                <!-- Sağdaki + Butonu -->
-                <Button x:Name="BtnAddReminder" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" ToolTip="Yeni Hatırlatıcı Ekle">
+                <!-- Yazı tam ortaya hizalandı -->
+                <TextBlock Text="TimeAnchor" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontWeight="Bold"/>
+                <!-- Buton sağa yaslı kaldı -->
+                <Button x:Name="BtnAddReminder" Click="BtnAddReminder_Click" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" ToolTip="Yeni Hatırlatıcı Ekle">
                     <materialDesign:PackIcon Kind="Plus" Width="24" Height="24"/>
                 </Button>
             </Grid>
         </materialDesign:ColorZone>
 
-        <!-- ALT KISIM (Görevler Listesi) -->
-        <ListBox x:Name="LstReminders" SelectionChanged="LstReminders_SelectionChanged" Grid.Row="1" Margin="10" Background="Transparent" BorderThickness="0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <!-- Her bir görev için Kart Görünümü (Card View) tasarımı -->
-                    <materialDesign:Card Margin="5" Padding="15" materialDesign:ElevationAssist.Elevation="Dp2" Width="330">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <!-- Sol taraf (Metinler) -->
-                                <ColumnDefinition Width="Auto"/>
-                                <!-- Sağ taraf (Butonlar) -->
-                            </Grid.ColumnDefinitions>
+        <!-- ALT KISIM (Sekmeler / Tabs) -->
+        <!-- BorderThickness="0,2,0,0" ile sekmelerin altına o istediğin çizgiyi ekledik -->
+        <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0,1,0,0" BorderBrush="#40000000" Margin="0,10,0,0">
 
-                            <!-- Sol Taraf: Başlık ve Tarih -->
-                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="16"/>
-                                <TextBlock Text="{Binding EventDate, StringFormat='dd.MM.yyyy HH:mm'}" Foreground="Gray" Margin="0,5,0,0"/>
-                            </StackPanel>
+            <!-- 1. SEKME: AKTİF GÖREVLER -->
+            <TabItem Header="Aktif Görevler">
+                <ListBox x:Name="LstActiveReminders" SelectionChanged="LstReminders_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,10,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card Margin="5" Padding="0" materialDesign:ElevationAssist.Elevation="Dp3" Width="380">
+                                <StackPanel>
+                                    <Grid Margin="15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="18"/>
+                                            <TextBlock Text="{Binding EventDate, StringFormat='dd.MM.yyyy HH:mm'}" Foreground="Gray" Margin="0,5,0,0"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive}" Click="TglActive_Click" Style="{StaticResource MaterialDesignSwitchToggleButton}" ToolTip="Görevi Arşive Kaldır"/>
+                                    </Grid>
 
-                            <!-- Sağ Taraf: Hızlı Aksiyon Butonları -->
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <!-- Tamamlandı İkonu (Yeşil) -->
-                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Tamamlandı İşaretle" Click="BtnComplete_Click">
-                                    <materialDesign:PackIcon Kind="Check" Foreground="LimeGreen"/>
-                                </Button>
+                                    <Separator Style="{StaticResource MaterialDesignLightSeparator}"/>
+                                    <Border Background="#F5F5F5" Padding="10,5">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="LimeGreen" Content="✔ TAMAMLANDI" Click="BtnComplete_Click"/>
+                                            <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="Red" Content="X SİL" Click="BtnQuickDelete_Click"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </TabItem>
 
-                                <!-- Sil İkonu (Kırmızı) -->
-                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Görevi Sil" Click="BtnQuickDelete_Click">
-                                    <materialDesign:PackIcon Kind="Close" Foreground="Red"/>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </materialDesign:Card>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            <!-- 2. SEKME: ARŞİV (PASİF GÖREVLER) -->
+            <TabItem Header="Arşiv">
+                <ListBox x:Name="LstArchiveReminders" SelectionChanged="LstReminders_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,10,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card Margin="5" Padding="0" materialDesign:ElevationAssist.Elevation="Dp1" Width="380" Opacity="0.8">
+                                <StackPanel>
+                                    <Grid Margin="15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" Foreground="DarkOrange" FontWeight="SemiBold" FontSize="16"/>
+                                            <TextBlock Text="Durduruldu / Beklemede" Foreground="Gray" FontSize="11" Margin="0,5,0,0"/>
+                                        </StackPanel>
+                                        <!-- Arşivdeki Toggle Kapalı Duruyor, Tıklanırsa Aktife Geçecek -->
+                                        <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive}" Click="TglActive_Click" Style="{StaticResource MaterialDesignSwitchToggleButton}" ToolTip="Tekrar Aktif Et"/>
+                                    </Grid>
+                                    <Separator Style="{StaticResource MaterialDesignLightSeparator}"/>
+                                    <Border Background="#F5F5F5" Padding="10,5">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="Red" Content="KALICI OLARAK SİL" Click="BtnQuickDelete_Click"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </TabItem>
+
+            <!-- 3. SEKME: TAMAMLANANLAR (ZİHİNSEL TATMİN) -->
+            <TabItem Header="Tamamlananlar">
+                <ListBox x:Name="LstCompletedReminders" SelectionChanged="LstReminders_SelectionChanged" Background="Transparent" BorderThickness="0" Margin="0,10,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card Margin="5" Padding="15" materialDesign:ElevationAssist.Elevation="Dp1" Width="380">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- O Tatmin Edici Yeşil Onay Rozeti -->
+                                    <materialDesign:PackIcon Grid.Column="0" Kind="CheckCircle" Foreground="LimeGreen" Width="32" Height="32" VerticalAlignment="Center" Margin="0,0,15,0"/>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="16"/>
+                                        <TextBlock Text="Başarıyla Tamamlandı" Foreground="LimeGreen" FontSize="11" Margin="0,3,0,0"/>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="2" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Geçmişten Sil" Click="BtnQuickDelete_Click">
+                                        <materialDesign:PackIcon Kind="Delete" Foreground="Gray"/>
+                                    </Button>
+                                </Grid>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </TabItem>
+
+        </TabControl>
     </Grid>
 </Window>

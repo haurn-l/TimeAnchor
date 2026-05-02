@@ -1,16 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using TimeAnchor.Models;
 using TimeAnchor.Repositories;
 
@@ -26,24 +15,24 @@ namespace TimeAnchor
             InitializeComponent();
             _dbHelper = new DatabaseHelper();
             _currentReminder = selectedReminder;
-
-            // Pencere açılır açılmaz verileri doldur
             TxtTitle.Text = _currentReminder.Title;
             TxtDescription.Text = _currentReminder.Description;
             DpDate.SelectedDate = _currentReminder.EventDate.Date;
             TpTime.SelectedTime = _currentReminder.EventDate;
-
-            // Veritabanındaki değere göre (0, 1, 2, 3, 4) açılır listeyi (ComboBox) ayarla
             CmbRecurrence.SelectedIndex = (int)_currentReminder.Recurrence;
+
+            if (_currentReminder.Id == 0)
+            {
+                this.Title = "Yeni Görev Ekle"; 
+                BtnSave.Content = "KAYDET"; 
+                BtnDelete.Visibility = Visibility.Collapsed; 
+            }
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            // Kutulardaki verileri al
             _currentReminder.Title = TxtTitle.Text;
             _currentReminder.Description = TxtDescription.Text;
-
-            // ComboBox'tan seçilen satırın indexini (0,1,2,3,4) Enum'a çeviriyoruz
             _currentReminder.Recurrence = (RecurrenceType)CmbRecurrence.SelectedIndex;
 
             if (DpDate.SelectedDate.HasValue && TpTime.SelectedTime.HasValue)
@@ -52,18 +41,24 @@ namespace TimeAnchor
                 DateTime selectedTime = TpTime.SelectedTime.Value;
                 DateTime combinedDate = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, selectedTime.Hour, selectedTime.Minute, 0);
 
-                // GÜVENLİK DUVARI: Görev "Tek Seferlik" (None) ise VE geçmiş bir zamansa ENGELLE!
+                // GÜVENLİK DUVARI
                 if (_currentReminder.Recurrence == RecurrenceType.None && combinedDate < DateTime.Now)
                 {
                     MessageBox.Show("Tek seferlik görevler geçmiş bir zamana kurulamaz! Lütfen ileri bir tarih/saat seçin.", "Geçersiz Zaman", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return; // Metodu durdur, veritabanına kaydetme
+                    return;
                 }
 
                 _currentReminder.EventDate = combinedDate;
             }
+            if (_currentReminder.Id == 0)
+            {
+                _dbHelper.AddReminder(_currentReminder);
+            }
+            else
+            {
+                _dbHelper.UpdateReminder(_currentReminder);
+            }
 
-            // Güvenlik duvarından geçtiyse güncellemeyi yap
-            _dbHelper.UpdateReminder(_currentReminder);
             this.Close();
         }
 

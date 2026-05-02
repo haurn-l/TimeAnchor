@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Text;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using TimeAnchor.Models;
 using TimeAnchor.Repositories;
 
@@ -16,104 +9,120 @@ namespace TimeAnchor
 {
     public partial class MainWindow : Window
     {
-        // Veritabanı işlemleri için nesnemizi tanımlıyoruz
         private DatabaseHelper dbHelper;
 
         public MainWindow()
         {
             InitializeComponent();
-
-            // Nesneyi ayağa kaldırıyoruz
             dbHelper = new DatabaseHelper();
-
-            // Ekran açılır açılmaz görevleri yükleyen metodu çağırıyoruz
             LoadReminders();
         }
 
         private void LoadReminders()
         {
-            // Veritabanındaki tüm hatırlatıcıları çekiyoruz
-            var reminders = dbHelper.GetAllReminders();
+            var allReminders = dbHelper.GetAllReminders();
 
-            // SADECE TEST İÇİN: Eğer liste boşsa, arayüzün nasıl göründüğünü anlamak için 1 tane sahte veri ekliyoruz.
-            if (reminders.Count == 0)
-            {
-                dbHelper.AddReminder(new Reminder
-                {
-                    Title = "İlk Görev: Sistemi Test Et",
-                    Description = "HarunSinevazyon arka plan mimarisi tıkır tıkır çalışıyor.",
-                    EventDate = DateTime.Now.AddHours(2), // Şu andan 2 saat sonrasına kurduk
-                    IsTimeSpecific = true,
-                    IsCompleted = false,
-                    IsSynced = false
-                });
+            // 1. Liste: Tamamlanmamış VE Aktif olanlar
+            LstActiveReminders.ItemsSource = allReminders.Where(r => !r.IsCompleted && r.IsActive).ToList();
 
-                // Sahte veriyi ekledikten sonra listeyi veritabanından tekrar güncel haliyle çekiyoruz
-                reminders = dbHelper.GetAllReminders();
-            }
+            // 2. Liste: Tamamlanmamış AMA Pasife alınmış (Arşivlenmiş) olanlar
+            LstArchiveReminders.ItemsSource = allReminders.Where(r => !r.IsCompleted && !r.IsActive).ToList();
 
-            // XAML tarafındaki 'LstReminders' isimli listemizin kaynağını bu çektiğimiz veriler yapıyoruz
-            LstReminders.ItemsSource = reminders;
+            // 3. Liste: Tamamlanmış olanlar (Aktiflik durumu önemsiz)
+            LstCompletedReminders.ItemsSource = allReminders.Where(r => r.IsCompleted).ToList();
         }
 
-        private void LstReminders_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void BtnAddReminder_Click(object sender, RoutedEventArgs e)
         {
-            // Eğer listeden gerçekten bir öğe seçildiyse (tıklandıysa)
-            if (LstReminders.SelectedItem is Reminder selectedReminder)
+            Reminder newReminder = new Reminder
             {
-                // Detay penceresini oluştur ve içine seçilen görevi gönder
+                EventDate = DateTime.Now.AddHours(1),
+                Recurrence = RecurrenceType.None,
+                IsActive = true
+            };
+
+            ReminderDetailWindow addWindow = new ReminderDetailWindow(newReminder);
+            addWindow.Owner = this;
+            addWindow.ShowDialog();
+            LoadReminders();
+        }
+
+        private void LstReminders_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox listBox = sender as ListBox;
+            if (listBox != null && listBox.SelectedItem is Reminder selectedReminder)
+            {
                 ReminderDetailWindow detailWindow = new ReminderDetailWindow(selectedReminder);
-
-                // Owner() kısmı, detay penceresinin ana pencerenin tam ortasında açılmasını sağlar
                 detailWindow.Owner = this;
-
-                // Pencereyi ShowDialog ile açıyoruz (bu pencere kapanana kadar alt satıra geçmez)
                 detailWindow.ShowDialog();
 
-                // Detay penceresi kapandıktan sonra (belki güncelleme yapılmıştır diye) listeyi yeniliyoruz
                 LoadReminders();
-
-                // Aynı öğeye tekrar tıklanabilmesi için seçimi sıfırlıyoruz
-                LstReminders.SelectedItem = null;
+                listBox.SelectedItem = null;
             }
         }
 
-        // Listedeki hızlı "Tamamlandı" (✔) butonuna basılınca
-        private void BtnComplete_Click(object sender, RoutedEventArgs e)
+        // AKILLI SWITCH: Kapatılırken uyarı verir, açılırken direkt aktife alır
+        private void TglActive_Click(object sender, RoutedEventArgs e)
         {
-            // Tıklanan butonun hangi görev kartına ait olduğunu buluyoruz
-            var button = sender as System.Windows.Controls.Button;
-            if (button != null && button.DataContext is Reminder clickedReminder)
+            if (sender is System.Windows.Controls.Primitives.ToggleButton tgl && tgl.DataContext is Reminder clickedReminder)
             {
-                // Görevi tamamlandı olarak işaretle
-                clickedReminder.IsCompleted = true;
+                bool isTurningOn = tgl.IsChecked ?? false;
+
+                // Eğer kullanıcı görevi kapatıyorsa (Arşive atıyorsa)
+                if (!isTurningOn)
+                {
+                    MessageBoxResult result = MessageBox.Show($"'{clickedReminder.Title}' görevini durdurup Arşiv sekmesine kaldırmak istiyor musunuz?", "Arşive Taşı", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.No)
+                    {
+                        // Kullanıcı vazgeçerse switch'i eski açık haline geri getir
+                        tgl.IsChecked = true;
+                        e.Handled = true;
+                        return;
+                    }
+                }
+
+                // Veritabanını güncelle
+                clickedReminder.IsActive = isTurningOn;
                 dbHelper.UpdateReminder(clickedReminder);
 
-                // Listeyi yenile
+                // Listeleri yenile (Görev sekmeler arası yer değiştirecek)
                 LoadReminders();
             }
-
-            // Satır seçimi tetiklenmesin diye event'i burada durduruyoruz
             e.Handled = true;
         }
 
-        // Listedeki hızlı "Sil" (X) butonuna basılınca
-        private void BtnQuickDelete_Click(object sender, RoutedEventArgs e)
+        private void BtnComplete_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as System.Windows.Controls.Button;
+            var button = sender as Button;
             if (button != null && button.DataContext is Reminder clickedReminder)
             {
-                MessageBoxResult result = MessageBox.Show($"'{clickedReminder.Title}' görevini silmek istiyor musun?", "Onay", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBoxResult result = MessageBox.Show($"'{clickedReminder.Title}' görevini başarıyla tamamladınız mı?", "Tebrikler!", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
                 if (result == MessageBoxResult.Yes)
                 {
-                    dbHelper.DeleteReminder(clickedReminder.Id);
-
-                    // Listeyi yenile
+                    clickedReminder.IsCompleted = true;
+                    clickedReminder.IsActive = false; // Bittiği için alarm motorundan düşürüyoruz
+                    dbHelper.UpdateReminder(clickedReminder);
                     LoadReminders();
                 }
             }
+            e.Handled = true;
+        }
 
-            // Satır seçimi tetiklenmesin diye event'i burada durduruyoruz
+        // BU BUTON HER 3 SEKMEDE DE "VERİTABANINDAN KALICI SİLME" İŞLEMİ YAPAR
+        private void BtnQuickDelete_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button != null && button.DataContext is Reminder clickedReminder)
+            {
+                MessageBoxResult result = MessageBox.Show($"Bu kaydı veritabanından KALICI OLARAK silmek istiyor musunuz?\n\n(Bu işlem geri alınamaz!)", "Kalıcı Silme Onayı", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Yes)
+                {
+                    dbHelper.DeleteReminder(clickedReminder.Id);
+                    LoadReminders();
+                }
+            }
             e.Handled = true;
         }
     }
