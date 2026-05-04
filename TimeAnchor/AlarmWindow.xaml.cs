@@ -19,6 +19,15 @@ namespace TimeAnchor
         {
             InitializeComponent();
             TxtTaskTitle.Text = task.Title;
+            if (string.IsNullOrWhiteSpace(task.Description))
+            {
+                TxtTaskDescription.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                TxtTaskDescription.Text = task.Description;
+                TxtTaskDescription.Visibility = Visibility.Visible;
+            }
             UserChoice = AlarmResult.Ignore;
         }
 
