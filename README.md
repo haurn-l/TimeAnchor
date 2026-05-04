@@ -1,10 +1,8 @@
-# ⚓ TimeAnchor (Zaman Çıpası)
+# ⚓ TimeAnchor (Zaman Çapası)
 
 TimeAnchor, zamanı sadece takip etmekle kalmayan, ona "çapa atan" modern, esnek ve arka planda sessizce çalışan bir kişisel asistan ve hatırlatıcı (Reminder/Habit Tracker) uygulamasıdır. 
 
 Windows Forms veya eski nesil arayüzlerin hantallığından uzak; tamamen modern Material Design prensipleriyle tasarlanmış, kullanıcı deneyimini (UX) ön planda tutan bir mimariye sahiptir.
-
-**Geliştirici:** HarunSinevazyon
 
 ## 🚀 Projenin Amacı ve Vizyonu
 Geleneksel "To-Do" (Yapılacaklar) uygulamaları genellikle görev bitirildiğinde onu yok eder. Ancak alışkanlıklar ve periyodik görevler süreklilik ister. TimeAnchor'ın temel felsefesi:
