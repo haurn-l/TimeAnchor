@@ -31,6 +31,8 @@ Geleneksel "To-Do" (Yapılacaklar) uygulamaları genellikle görev bitirildiğin
 - [ ] **Özel Ses Entegrasyonu:** Alarm çaldığında Windows bildirim sesi yerine, kullanıcının seçebileceği özel ses dosyalarının (.wav/.mp3) çalınması.
 - [ ] **Kategori ve Renk Etiketleri:** Görevleri "İş", "Okul", "Kişisel" gibi etiketlere bölme ve bunlara göre filtreleyebilme özelliği.
 - [ ] **Veritabanı Dışa Aktarma (Export/Import):** Kullanıcıların verilerini JSON veya CSV formatında yedekleyebilmesi.
+- [ ] **Eşzamanlı Cihaz Entegrasyonu:** Kullanıcıların farklı cihazlarda aynı oturumlarla giriş yapıp kullanabilecek bir hesap oluşturabilmesi.
+- [ ] **Mobil Aplikasyon:**Projeyi bir adım daha öteye taşıyıp mobil bir Android/IOS uygulaması geliştirmek.
 
 ---
 *Zamanı yakalayamayabilirsin, ama ona çapa atabilirsin.* ⚓
