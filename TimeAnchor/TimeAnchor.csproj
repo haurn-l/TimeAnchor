@@ -7,11 +7,10 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>TimeAnchor logo.ico</ApplicationIcon>
+    <ApplicationIcon>TimeAnchor.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="TimeAnchor logo.ico" />
     <Content Include="TimeAnchor.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

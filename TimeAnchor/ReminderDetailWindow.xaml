@@ -9,13 +9,10 @@
         FontFamily="{DynamicResource MaterialDesignFont}">
 
     <StackPanel Margin="20">
-        <!-- Başlık -->
         <TextBox x:Name="TxtTitle" 
                  materialDesign:HintAssist.Hint="Görev Başlığı" 
                  Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
                  FontSize="16" FontWeight="Bold"/>
-
-        <!-- Açıklama (Çok satırlı) -->
         <TextBox x:Name="TxtDescription" 
                  materialDesign:HintAssist.Hint="Detaylı Açıklama" 
                  Style="{StaticResource MaterialDesignOutlinedTextBox}" 
@@ -30,13 +27,11 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Tarih Seçici -->
             <DatePicker x:Name="DpDate" 
                         Grid.Column="0"
                         materialDesign:HintAssist.Hint="Tarih" 
                         Style="{StaticResource MaterialDesignFloatingHintDatePicker}"/>
 
-            <!-- Saat Seçici -->
             <materialDesign:TimePicker x:Name="TpTime" 
                                        Grid.Column="2"
                                        Is24Hours="True"
@@ -50,7 +45,6 @@
             <ComboBoxItem Content="Her Ay"/>
             <ComboBoxItem Content="Her Yıl"/>
         </ComboBox>
-        <!-- Kaydet Butonu -->
         <Button x:Name="BtnSave" Content="GÜNCELLE VE KAYDET" 
                 Margin="0,30,0,0" Click="BtnSave_Click"/>
         <Button x:Name="BtnDelete" Content="GÖREVİ SİL" 

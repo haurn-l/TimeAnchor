@@ -191,28 +191,23 @@ namespace TimeAnchor
             }
             e.Handled = true;
         }
-        // --- SYSTEM TRAY (HAYALET MOD) İŞLEMLERİ ---
         private void SetupSystemTray()
         {
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
 
-            // Şimdilik Windows'un varsayılan "Bilgi" ikonunu kullanıyoruz
             try
             {
                 _notifyIcon.Icon = new System.Drawing.Icon("TimeAnchor.ico");
             }
             catch
             {
-                // Eğer bir hata olursa uygulama çökmesin diye varsayılanı kullanmaya devam etsin
                 _notifyIcon.Icon = System.Drawing.SystemIcons.Information;
             }
             _notifyIcon.Visible = true;
             _notifyIcon.Text = "TimeAnchor Arka Planda Çalışıyor...";
 
-            // İkona çift tıklanınca uygulamayı ekrana geri getir
             _notifyIcon.DoubleClick += (s, e) => ShowApplication();
 
-            // İkona sağ tıklayınca açılacak menü (Profesyonel dokunuş)
             var contextMenu = new System.Windows.Forms.ContextMenuStrip();
             contextMenu.Items.Add("TimeAnchor'ı Aç", null, (s, e) => ShowApplication());
             contextMenu.Items.Add("Tamamen Çıkış Yap", null, (s, e) => ExitApplication());
@@ -221,32 +216,27 @@ namespace TimeAnchor
 
         private void ShowApplication()
         {
-            this.Show(); // Pencereyi görünür yap
-            this.WindowState = WindowState.Normal; // Küçültülmüşse normal boyuta al
-            this.Topmost = true; // Uygulamayı diğer pencerelerin önüne getir
-            this.Topmost = false; // Sürekli en önde kalmasın diye geri bırak
+            this.Show();
+            this.WindowState = WindowState.Normal; 
+            this.Topmost = true;
+            this.Topmost = false; 
         }
 
         private void ExitApplication()
         {
-            // İkonu görev çubuğundan temizle ve uygulamayı tamamen öldür
             SaveWindowSettings();
             _notifyIcon.Visible = false;
             _notifyIcon.Dispose();
             System.Windows.Application.Current.Shutdown();
         }
 
-        // EN KRİTİK NOKTA: Kullanıcı sağ üstteki 'X' butonuna bastığında çalışan metodu eziyoruz (Override)
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             SaveWindowSettings();
-            e.Cancel = true; // Uygulamanın Windows tarafından tamamen kapatılmasını İPTAL ET
-            this.Hide();     // Pencereyi sadece gizle (Hayalet moda geç)
-
-            // Kullanıcıya küçük bir balon bildirimle bilgi ver (2 saniye ekranda kalır)
+            e.Cancel = true; 
+            this.Hide();     
             _notifyIcon.ShowBalloonTip(2000, "TimeAnchor", "Arka planda çalışmaya devam ediyorum. Görev çubuğundan (saatin yanından) bana ulaşabilirsin.", System.Windows.Forms.ToolTipIcon.Info);
         }
-        // --- PENCERE BOYUT HAFIZASI ---
         private string settingsFile = "window_settings.txt";
 
         private void LoadWindowSettings()
@@ -255,25 +245,21 @@ namespace TimeAnchor
             {
                 if (System.IO.File.Exists(settingsFile))
                 {
-                    // Dosyadan oku ve ayır
                     var parts = System.IO.File.ReadAllText(settingsFile).Split(',');
                     this.Width = double.Parse(parts[0]);
                     this.Height = double.Parse(parts[1]);
                     this.Top = double.Parse(parts[2]);
                     this.Left = double.Parse(parts[3]);
-
-                    // Windows'un bunu ekranın ortasında değil, bizim verdiğimiz koordinatlarda açması için:
                     this.WindowStartupLocation = WindowStartupLocation.Manual;
                 }
             }
-            catch { } // Eğer dosya bozuksa hiçbir şey yapma, varsayılan boyutta açılsın
+            catch { }
         }
 
         private void SaveWindowSettings()
         {
             try
             {
-                // Sadece pencere normal durumdayken (Tam ekran vs değilken) kaydet
                 if (this.WindowState == WindowState.Normal)
                 {
                     string data = $"{this.Width},{this.Height},{this.Top},{this.Left}";
