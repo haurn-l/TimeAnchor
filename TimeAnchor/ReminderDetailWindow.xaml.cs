@@ -31,25 +31,31 @@ namespace TimeAnchor
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(TxtTitle.Text))
+            {
+                MessageBox.Show("Görev başlığı boş bırakılamaz!", "Eksik Bilgi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }    
+            if (!DpDate.SelectedDate.HasValue || !TpTime.SelectedTime.HasValue)
+            {
+                MessageBox.Show("Lütfen geçerli bir tarih ve saat girdiğinizden emin olun.\n\n(Not: Saat formatını 02:30 veya 14:45 şeklinde iki nokta ile giriniz. Hatalı girişler sistem tarafından kabul edilmez.)", "Geçersiz Zaman Formatı", MessageBoxButton.OK, MessageBoxImage.Error);
+                return; 
+            }
+
             _currentReminder.Title = TxtTitle.Text;
             _currentReminder.Description = TxtDescription.Text;
             _currentReminder.Recurrence = (RecurrenceType)CmbRecurrence.SelectedIndex;
 
-            if (DpDate.SelectedDate.HasValue && TpTime.SelectedTime.HasValue)
+            DateTime selectedDate = DpDate.SelectedDate.Value;
+            DateTime selectedTime = TpTime.SelectedTime.Value;
+            DateTime combinedDate = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, selectedTime.Hour, selectedTime.Minute, 0);
+            if (_currentReminder.Recurrence == RecurrenceType.None && combinedDate < DateTime.Now)
             {
-                DateTime selectedDate = DpDate.SelectedDate.Value;
-                DateTime selectedTime = TpTime.SelectedTime.Value;
-                DateTime combinedDate = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, selectedTime.Hour, selectedTime.Minute, 0);
-
-                // GÜVENLİK DUVARI
-                if (_currentReminder.Recurrence == RecurrenceType.None && combinedDate < DateTime.Now)
-                {
-                    MessageBox.Show("Tek seferlik görevler geçmiş bir zamana kurulamaz! Lütfen ileri bir tarih/saat seçin.", "Geçersiz Zaman", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                _currentReminder.EventDate = combinedDate;
+                MessageBox.Show("Tek seferlik görevler geçmiş bir zamana kurulamaz! Lütfen ileri bir tarih/saat seçin.", "Geçersiz Zaman", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
+            _currentReminder.EventDate = combinedDate;
+
             if (_currentReminder.Id == 0)
             {
                 _dbHelper.AddReminder(_currentReminder);
@@ -61,7 +67,6 @@ namespace TimeAnchor
 
             this.Close();
         }
-
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show("Bu görevi silmek istediğinize emin misiniz?", "Silme Onayı", MessageBoxButton.YesNo, MessageBoxImage.Warning);
