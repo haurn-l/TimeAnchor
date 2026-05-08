@@ -6,14 +6,13 @@ using System.Threading.Tasks;
 
 namespace TimeAnchor.Models
 {
-   
     public enum RecurrenceType
     {
-        None = 0,     
-        Daily = 1,    
-        Weekly = 2,   
-        Monthly = 3,  
-        Yearly = 4    
+        None = 0,
+        Daily = 1,
+        Weekly = 2,
+        Monthly = 3,
+        Yearly = 4
     }
 
     public class Reminder
@@ -24,8 +23,10 @@ namespace TimeAnchor.Models
         public DateTime EventDate { get; set; }
         public bool IsTimeSpecific { get; set; }
         public bool IsCompleted { get; set; }
-        public bool IsActive { get; set; } 
+        public bool IsActive { get; set; }
         public bool IsSynced { get; set; }
         public RecurrenceType Recurrence { get; set; }
+        public string Category { get; set; }
+        public string AlarmSoundPath { get; set; }
     }
 }

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Windows;
+using System.Windows.Controls;
 using TimeAnchor.Models;
 using TimeAnchor.Repositories;
 
@@ -15,17 +17,48 @@ namespace TimeAnchor
             InitializeComponent();
             _dbHelper = new DatabaseHelper();
             _currentReminder = selectedReminder;
+
             TxtTitle.Text = _currentReminder.Title;
             TxtDescription.Text = _currentReminder.Description;
             DpDate.SelectedDate = _currentReminder.EventDate.Date;
             TpTime.SelectedTime = _currentReminder.EventDate;
             CmbRecurrence.SelectedIndex = (int)_currentReminder.Recurrence;
 
+            if (!string.IsNullOrEmpty(_currentReminder.Category))
+            {
+                foreach (ComboBoxItem item in CmbCategory.Items)
+                {
+                    if (item.Content.ToString() == _currentReminder.Category)
+                    {
+                        CmbCategory.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                CmbCategory.SelectedIndex = 0; 
+            }
+
+            TxtSoundPath.Text = _currentReminder.AlarmSoundPath;
+
             if (_currentReminder.Id == 0)
             {
-                this.Title = "Yeni Görev Ekle"; 
-                BtnSave.Content = "KAYDET"; 
-                BtnDelete.Visibility = Visibility.Collapsed; 
+                this.Title = "Yeni Görev Ekle";
+                BtnSave.Content = "KAYDET";
+                BtnDelete.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void BtnSelectSound_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Ses Dosyaları (*.wav;*.mp3)|*.wav;*.mp3|Tüm Dosyalar (*.*)|*.*";
+            openFileDialog.Title = "Alarm İçin Özel Ses Seçin";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                TxtSoundPath.Text = openFileDialog.FileName;
             }
         }
 
@@ -35,27 +68,31 @@ namespace TimeAnchor
             {
                 MessageBox.Show("Görev başlığı boş bırakılamaz!", "Eksik Bilgi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
-            }    
+            }
             if (!DpDate.SelectedDate.HasValue || !TpTime.SelectedTime.HasValue)
             {
                 MessageBox.Show("Lütfen geçerli bir tarih ve saat girdiğinizden emin olun.\n\n(Not: Saat formatını 02:30 veya 14:45 şeklinde iki nokta ile giriniz. Hatalı girişler sistem tarafından kabul edilmez.)", "Geçersiz Zaman Formatı", MessageBoxButton.OK, MessageBoxImage.Error);
-                return; 
+                return;
             }
 
             _currentReminder.Title = TxtTitle.Text;
             _currentReminder.Description = TxtDescription.Text;
             _currentReminder.Recurrence = (RecurrenceType)CmbRecurrence.SelectedIndex;
 
+            _currentReminder.Category = CmbCategory.SelectedItem != null ? ((ComboBoxItem)CmbCategory.SelectedItem).Content.ToString() : "Genel";
+            _currentReminder.AlarmSoundPath = TxtSoundPath.Text;
+
             DateTime selectedDate = DpDate.SelectedDate.Value;
             DateTime selectedTime = TpTime.SelectedTime.Value;
             DateTime combinedDate = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, selectedTime.Hour, selectedTime.Minute, 0);
+
             if (_currentReminder.Recurrence == RecurrenceType.None && combinedDate < DateTime.Now)
             {
                 MessageBox.Show("Tek seferlik görevler geçmiş bir zamana kurulamaz! Lütfen ileri bir tarih/saat seçin.", "Geçersiz Zaman", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            _currentReminder.EventDate = combinedDate;
 
+            _currentReminder.EventDate = combinedDate;
             if (_currentReminder.Id == 0)
             {
                 _dbHelper.AddReminder(_currentReminder);
@@ -67,6 +104,7 @@ namespace TimeAnchor
 
             this.Close();
         }
+
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show("Bu görevi silmek istediğinize emin misiniz?", "Silme Onayı", MessageBoxButton.YesNo, MessageBoxImage.Warning);

@@ -5,6 +5,8 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="TimeAnchor" Height="600" Width="450"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -19,7 +21,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" Grid.Row="0" materialDesign:ElevationAssist.Elevation="Dp4">
+        <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" Grid.Row="0" materialDesign:ElevationAssist.Elevation="Dp4" MouseLeftButtonDown="TopBar_MouseLeftButtonDown">
             <Grid>
                 <TextBlock Text="TimeAnchor" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontWeight="Bold"/>
 
@@ -38,9 +40,21 @@
                     </Popup>
                 </StackPanel>
 
-                <Button x:Name="BtnAddReminder" Click="BtnAddReminder_Click" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" ToolTip="Yeni Hatırlatıcı Ekle">
-                    <materialDesign:PackIcon Kind="Plus" Width="24" Height="24"/>
-                </Button>
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" Margin="0,-10,-10,0">
+                    <Button x:Name="BtnAddReminder" Click="BtnAddReminder_Click" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" ToolTip="Yeni Hatırlatıcı Ekle" Margin="0,0,15,0" Width="30" Height="30">
+                        <materialDesign:PackIcon Kind="Plus" Width="20" Height="20"/>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="White" Padding="5" Click="BtnMinimize_Click" ToolTip="Küçült">
+                        <materialDesign:PackIcon Kind="WindowMinimize" />
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="White" Padding="5" Click="BtnMaximize_Click" ToolTip="Tam Ekran">
+                        <materialDesign:PackIcon Kind="WindowMaximize" />
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Foreground="White" Padding="5" Click="BtnClose_Click" ToolTip="Kapat">
+                        <materialDesign:PackIcon Kind="Close" />
+                    </Button>
+                </StackPanel>
             </Grid>
         </materialDesign:ColorZone>
 
@@ -59,11 +73,15 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="18"/>
-                                            <TextBlock Text="{Binding EventDate, StringFormat='dd.MM.yyyy HH:mm'}" Foreground="Gray" Margin="0,5,0,0"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                <Border Background="DarkOrange" CornerRadius="4" Padding="6,2" Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding Category}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding EventDate, StringFormat='dd.MM.yyyy HH:mm'}" Foreground="Gray" VerticalAlignment="Center"/>
+                                            </StackPanel>
                                         </StackPanel>
                                         <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive}" Click="TglActive_Click" Style="{StaticResource MaterialDesignSwitchToggleButton}" ToolTip="Görevi Arşive Kaldır"/>
                                     </Grid>
-
                                     <Separator Style="{StaticResource MaterialDesignLightSeparator}"/>
                                     <Border Background="#F5F5F5" Padding="10,5">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -90,9 +108,13 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Title}" Foreground="DarkOrange" FontWeight="SemiBold" FontSize="16"/>
-                                            <TextBlock Text="Durduruldu / Beklemede" Foreground="Gray" FontSize="11" Margin="0,5,0,0"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                <Border Background="Gray" CornerRadius="4" Padding="6,2" Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding Category}" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
+                                                </Border>
+                                                <TextBlock Text="Durduruldu / Beklemede" Foreground="Gray" FontSize="11" VerticalAlignment="Center"/>
+                                            </StackPanel>
                                         </StackPanel>
-
                                         <ToggleButton Grid.Column="1" IsChecked="{Binding IsActive}" Click="TglActive_Click" Style="{StaticResource MaterialDesignSwitchToggleButton}" ToolTip="Tekrar Aktif Et"/>
                                     </Grid>
                                     <Separator Style="{StaticResource MaterialDesignLightSeparator}"/>
@@ -118,14 +140,16 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-
                                     <materialDesign:PackIcon Grid.Column="0" Kind="CheckCircle" Foreground="LimeGreen" Width="32" Height="32" VerticalAlignment="Center" Margin="0,0,15,0"/>
-
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="16"/>
-                                        <TextBlock Text="Başarıyla Tamamlandı" Foreground="LimeGreen" FontSize="11" Margin="0,3,0,0"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                            <Border Background="LimeGreen" CornerRadius="4" Padding="6,2" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding Category}" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
+                                            </Border>
+                                            <TextBlock Text="Başarıyla Tamamlandı" Foreground="LimeGreen" FontSize="11" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </StackPanel>
-
                                     <Button Grid.Column="2" Style="{StaticResource MaterialDesignIconButton}" ToolTip="Geçmişten Sil" Click="BtnQuickDelete_Click">
                                         <materialDesign:PackIcon Kind="Delete" Foreground="Gray"/>
                                     </Button>
@@ -135,7 +159,6 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </TabItem>
-
         </TabControl>
     </Grid>
 </Window>

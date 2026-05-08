@@ -24,7 +24,9 @@ namespace TimeAnchor.Repositories
                         IsCompleted INTEGER NOT NULL,
                         IsActive INTEGER NOT NULL DEFAULT 1,
                         IsSynced INTEGER NOT NULL,
-                        Recurrence INTEGER NOT NULL DEFAULT 0
+                        Recurrence INTEGER NOT NULL DEFAULT 0,
+                        Category TEXT,
+                        AlarmSoundPath TEXT
                     );";
 
                 using (var command = new SqliteCommand(createTableQuery, connection))
@@ -40,8 +42,8 @@ namespace TimeAnchor.Repositories
             {
                 connection.Open();
                 string insertQuery = @"
-                    INSERT INTO Reminders (Title, Description, EventDate, IsTimeSpecific, IsCompleted, IsActive, IsSynced, Recurrence) 
-                    VALUES (@Title, @Description, @EventDate, @IsTimeSpecific, @IsCompleted, @IsActive, @IsSynced, @Recurrence)";
+                    INSERT INTO Reminders (Title, Description, EventDate, IsTimeSpecific, IsCompleted, IsActive, IsSynced, Recurrence, Category, AlarmSoundPath) 
+                    VALUES (@Title, @Description, @EventDate, @IsTimeSpecific, @IsCompleted, @IsActive, @IsSynced, @Recurrence, @Category, @AlarmSoundPath)";
 
                 using (var command = new SqliteCommand(insertQuery, connection))
                 {
@@ -53,6 +55,8 @@ namespace TimeAnchor.Repositories
                     command.Parameters.AddWithValue("@IsActive", reminder.IsActive ? 1 : 0);
                     command.Parameters.AddWithValue("@IsSynced", reminder.IsSynced ? 1 : 0);
                     command.Parameters.AddWithValue("@Recurrence", (int)reminder.Recurrence);
+                    command.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(reminder.Category) ? "Genel" : reminder.Category);
+                    command.Parameters.AddWithValue("@AlarmSoundPath", reminder.AlarmSoundPath ?? "");
 
                     command.ExecuteNonQuery();
                 }
@@ -83,7 +87,9 @@ namespace TimeAnchor.Repositories
                                 IsCompleted = Convert.ToInt32(reader["IsCompleted"]) == 1,
                                 IsActive = Convert.ToInt32(reader["IsActive"]) == 1,
                                 IsSynced = Convert.ToInt32(reader["IsSynced"]) == 1,
-                                Recurrence = (RecurrenceType)Convert.ToInt32(reader["Recurrence"])
+                                Recurrence = (RecurrenceType)Convert.ToInt32(reader["Recurrence"]),
+                                Category = reader["Category"] != DBNull.Value ? reader["Category"].ToString() : "Genel",
+                                AlarmSoundPath = reader["AlarmSoundPath"] != DBNull.Value ? reader["AlarmSoundPath"].ToString() : ""
                             });
                         }
                     }
@@ -106,7 +112,9 @@ namespace TimeAnchor.Repositories
                         IsCompleted = @IsCompleted, 
                         IsActive = @IsActive,
                         IsSynced = @IsSynced,
-                        Recurrence = @Recurrence
+                        Recurrence = @Recurrence,
+                        Category = @Category,
+                        AlarmSoundPath = @AlarmSoundPath
                     WHERE Id = @Id";
 
                 using (var command = new SqliteCommand(updateQuery, connection))
@@ -120,6 +128,8 @@ namespace TimeAnchor.Repositories
                     command.Parameters.AddWithValue("@IsActive", reminder.IsActive ? 1 : 0);
                     command.Parameters.AddWithValue("@IsSynced", reminder.IsSynced ? 1 : 0);
                     command.Parameters.AddWithValue("@Recurrence", (int)reminder.Recurrence);
+                    command.Parameters.AddWithValue("@Category", string.IsNullOrWhiteSpace(reminder.Category) ? "Genel" : reminder.Category);
+                    command.Parameters.AddWithValue("@AlarmSoundPath", reminder.AlarmSoundPath ?? "");
 
                     command.ExecuteNonQuery();
                 }
